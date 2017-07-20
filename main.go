@@ -27,12 +27,17 @@ func lastBuildStatus(builder string) (string, error) {
 		}
 
 		var doc struct {
-			Text []string `json:"text"`
+			Number int      `json:"number"`
+			Text   []string `json:"text"`
 		}
 		d := json.NewDecoder(rsp.Body)
 		err = d.Decode(&doc)
 		if err != nil {
 			return "", err
+		}
+
+		if len(doc.Text) > 1 && doc.Text[0] == "failed" {
+			return fmt.Sprintf("FAIL: https://build.voidlinux.eu/builders/%s/builds/%d/steps/%s/logs/stdio", builder, doc.Number, doc.Text[1]), nil
 		}
 		return strings.Join(doc.Text, " "), nil
 	}
